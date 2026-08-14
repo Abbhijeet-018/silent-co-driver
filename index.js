@@ -64,7 +64,7 @@ app.post("/upload-audio", upload.single('audio'), wrapAsync(async (req, res) => 
         headers['User-Agent'] = 'Node.js/Axios';
 
         const response = await axios.post(
-            "process.env.ML_MODEL",
+            "process.env.ML_API_URL ",
             form,
             {
                 headers: headers
