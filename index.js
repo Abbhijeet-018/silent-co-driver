@@ -23,10 +23,6 @@ app.use(session({
         httpOnly: true,
     }
 }))
-mongoose.connect('mongodb://127.0.0.1:27017/F1_hackathon')
-    .then(() => console.log('MongoDB connected successfully!'))
-    .catch(err => console.error('Connection error:', err));
-
 // Middleware to parse JSON request bodies
 app.use(express.json());
 // Middleware to parse URL-encoded bodies (form submissions)
