@@ -68,7 +68,7 @@ app.post("/upload-audio", upload.single('audio'), wrapAsync(async (req, res) => 
         headers['User-Agent'] = 'Node.js/Axios';
 
         const response = await axios.post(
-            "https://clergyman-glacial-shining.ngrok-free.dev/predict",
+            "process.env.ML_MODEL",
             form,
             {
                 headers: headers
