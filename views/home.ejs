@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="description"
+    content="The Silent Co-Driver V2 - Driver radio in, stress flags out, correlated against lap performance.">
+  <title>The Silent Co-Driver V2</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Background Tech Grid & Vignette (from original) -->
+  <div aria-hidden="true" class="bg-techgrid" style="position: fixed; inset: 0; pointer-events: none;"></div>
+  <div aria-hidden="true" class="vignette" style="position: fixed; inset: 0; pointer-events: none;"></div>
+
+  <!-- Main Viewport Container -->
+  <main id="main-content"
+    style="position: relative; z-index: 1; padding: 40px 16px 80px 16px; max-width: var(--container-max); margin: 0 auto; display: flex; flex-direction: column; gap: 36px;">
+
+    <!-- Minimal Product Header (Original Brand Styling, No Navbar) -->
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--ink-500);">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="pulse-dot" aria-hidden="true"></span>
+        <span class="stem" style="font-size: 14px; letter-spacing: 0.14em; color: var(--text-100);">THE SILENT
+          CO-DRIVER</span>
+        <span class="chip chip-cyan" style="font-size: 9px;">V2 ANALYSIS</span>
+      </div>
+      <span class="stem-sm" style="color: var(--text-300);">MOTORSPORT AI ANALYSIS</span>
+    </div>
+
+    <!-- 01 // AUDIO INPUT & UPLOAD -->
+    <section>
+      <div class="section-title-wrap">
+        <div class="section-accent-bar" aria-hidden="true"></div>
+        <h2 class="section-title">01 // AUDIO INPUT</h2>
+      </div>
+
+      <div class="pipeline-panel" data-preview-panel>
+        <div class="audio-player-bar">
+          <div style="display: flex; align-items: center; gap: 16px; min-width: 0; flex: 1;">
+            <button id="play-btn" type="button" aria-label="Play audio clip" aria-pressed="false"
+              class="play-btn-square">
+              <span id="icon-play" class="material-symbols-outlined" style="font-size: 20px;"
+                aria-hidden="true">play_arrow</span>
+              <span id="icon-pause" class="material-symbols-outlined" style="font-size: 20px; display: none;"
+                aria-hidden="true">pause</span>
+            </button>
+            <div style="display: flex; flex-direction: column; gap: 2px; overflow: hidden;">
+              <span id="audio-filename" class="data"
+                style="font-size: 13px; color: var(--text-100); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">NO
+                AUDIO LOADED</span>
+              <span id="audio-duration" class="stem-sm" style="color: var(--text-400);">DURATION: --:--</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <form id="audio-upload-form" onsubmit="return false;" enctype="multipart/form-data">
+              <input type="file" id="audio-file-input" name="audio" accept="audio/*" style="display: none;"
+                onclick="this.value = null;" onchange="handleAudioFileUpload(event)">
+              <button type="button" class="btn btn-primary"
+                onclick="document.getElementById('audio-file-input').click()">
+                <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">upload_file</span>
+                UPLOAD AUDIO
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sample Audio Selection Pills -->
+        <div
+          style="display: flex; gap: 10px; padding: 10px 16px; background: var(--ink-700); border-bottom: 1px solid var(--ink-500); align-items: center; flex-wrap: wrap;">
+          <span class="stem-sm" style="color: var(--text-400);">SAMPLE CLIPS:</span>
+          <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 10px;"
+            onclick="loadPresetClip(1)">Clip 1: Turn 4 Oversteer</button>
+          <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 10px;"
+            onclick="loadPresetClip(2)">Clip 2: Traffic & Brake Temp</button>
+          <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 10px;"
+            onclick="loadPresetClip(3)">Clip 3: Clean Lap Push</button>
+        </div>
+
+        <div
+          style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-top: 1px solid var(--ink-500);">
+          <span class="stem-sm" style="color: var(--text-400);">RMS LEVEL</span>
+          <span id="audio-status-chip" class="chip chip-neutral">NO AUDIO ANALYZED</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 // ANALYSIS (UNDER AUDIO UPLOAD) -->
+    <section>
+      <div class="section-title-wrap">
+        <div class="section-accent-bar" aria-hidden="true"></div>
+        <h2 class="section-title">02 // ANALYSIS</h2>
+      </div>
+
+      <div class="pipeline-panel">
+        <div class="transcript-box">
+          <div id="transcript-lines">
+            <div class="transcript-line">
+              <span class="transcript-time">00:00.0</span>
+              <span class="transcript-normal">Upload an audio recording or select a sample clip to run acoustic stress
+                analysis.</span>
+            </div>
+          </div>
+
+          <div class="chip-container">
+            <span id="chip-calm" class="chip chip-neutral">Calm --</span>
+            <span id="chip-stress" class="chip chip-neutral">Stressed --</span>
+            <span id="chip-tired" class="chip chip-neutral">Tired --</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 // LAP-TIME DATA INPUT (SOURCE OF TRUTH) -->
+    <section>
+      <div class="section-title-wrap">
+        <div class="section-accent-bar" aria-hidden="true"></div>
+        <h2 class="section-title">03 // LAP-TIME DATA INPUT</h2>
+      </div>
+
+      <div class="lap-input-panel">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <span class="stem-sm" style="color: var(--text-300);">ENTER LAP TIMES (THE GRAPH VISUALIZES THIS DATA)</span>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-secondary" style="padding: 5px 12px; font-size: 10px;"
+              onclick="clearAllLaps()">Clear Laps</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Lap Inputs List -->
+        <div id="lap-inputs-list"
+          style="display: flex; flex-direction: column; gap: 6px; max-height: 340px; overflow-y: auto; padding-right: 4px;">
+          <!-- Dynamically populated by JS -->
+        </div>
+
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--ink-500);">
+          <button id="add-lap-btn" type="button" class="btn btn-primary" onclick="addLapRow()">
+            <span class="material-symbols-outlined" style="font-size: 16px;" aria-hidden="true">add</span>
+            + ADD LAP
+          </button>
+          <span id="lap-counter-text" class="stem-sm" style="color: var(--text-300);">6 LAPS RECORDED</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 // CORRELATION & PERFORMANCE GRAPH -->
+    <section>
+      <div class="section-title-wrap">
+        <div class="section-accent-bar" aria-hidden="true"></div>
+        <h2 class="section-title">04 // CORRELATION GRAPH</h2>
+      </div>
+
+      <div class="pipeline-panel">
+        <div class="correlation-header">
+          <span class="data" style="font-size: 11px; color: var(--text-300);">LAP TIME TELEMETRY (GENERATED FROM LAP
+            INPUTS)</span>
+          <div class="correlation-legend">
+            <div class="legend-item">
+              <span style="width: 6px; height: 6px; background: var(--cyan-500); border-radius: 50%;"></span>
+              <span class="stem-sm" style="color: var(--text-300);">CALM</span>
+            </div>
+            <div class="legend-item">
+              <span style="width: 6px; height: 6px; background: var(--red-500); border-radius: 50%;"></span>
+              <span class="stem-sm" style="color: var(--text-300);">STRESS</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Lap Chart rendered dynamically from lap input data -->
+        <div id="lap-chart-container" class="chart-container"></div>
+
+        <div class="correlation-footer">
+          <span style="width: 3px; background: var(--red-500); flex-shrink: 0; display: block;"
+            aria-hidden="true"></span>
+          <span id="correlation-insight-text">Stress event at Lap 4 correlates with +0.801s lap time loss against stint
+            average.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/script.js?v=2"></script>
+</body>
+
+</html>
