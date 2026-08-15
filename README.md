@@ -44,6 +44,7 @@ silent-co-driver/
 - Node.js (v18+) and npm installed
 - A Google account (to run the Colab notebook)
 - API keys/config needed by `cloudConfig.js` (fill in whatever it expects — DB URI, storage keys, etc.)
+- Put ngrok auth-token in the speech_emotion_recognition_with_openai_whisper.ipynb. It is in the last cell of google colab.
 
 ---
 
